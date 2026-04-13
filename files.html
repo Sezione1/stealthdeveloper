@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Files</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body style="text-align:center;">
+
+<h2>📂 I tuoi file</h2>
+
+<div id="content" style="display:none;">
+  <a href="LINK_DRIVE">Apri File</a>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAClXwYAbKBec_Mc6XQT9ttNCQJTwlV2UU",
+  authDomain: "stealthdeveloperfiles.firebaseapp.com",
+  projectId: "stealthdeveloperfiles",
+  storageBucket: "stealthdeveloperfiles.firebasestorage.app",
+  messagingSenderId: "918965438979",
+  appId: "1:918965438979:web:6634ab5caf697c116d9c36"
+};
+
+firebase.initializeApp(firebaseConfig);
+</script>
+<script>
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    document.getElementById("content").style.display = "block";
+  } else {
+    window.location.href = "login.html";
+  }
+});
+</script>
+<button onclick="logout()">Logout</button>
+
+<script>
+function logout() {
+  firebase.auth().signOut().then(() => {
+    window.location.href = "login.html";
+  });
+}
+</script>
+</body>
+</html>
