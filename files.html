@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stealth Files</title>
+<title>Stealth Drive</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <style>
 body {
@@ -16,120 +17,54 @@ body {
   color: white;
 }
 
-/* HEADER */
 .header {
   padding: 15px;
   background: #000;
   text-align: center;
-  font-size: 20px;
 }
 
-/* GRID */
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+.upload {
   padding: 15px;
 }
 
-/* CARD */
-.card {
-  background: rgba(0,0,0,0.7);
-  border-radius: 12px;
-  padding: 15px;
-  text-align: center;
-  transition: 0.2s;
-  cursor: pointer;
-}
-
-.card:hover {
-  background: rgba(0,255,150,0.2);
-}
-
-/* ICONA */
-.icon {
-  font-size: 35px;
-}
-
-/* NOME */
-.name {
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-/* DESC */
-.desc {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-/* LOGOUT */
-.logout {
-  margin: 10px;
+button {
   padding: 10px;
-  width: calc(100% - 20px);
-  background: red;
   border: none;
   border-radius: 8px;
-  color: white;
+  background: #00ff99;
+  font-weight: bold;
 }
 
-/* SEZIONE */
-.section-title {
-  margin: 10px 15px;
-  font-size: 16px;
-  opacity: 0.8;
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 15px;
+}
+
+.card {
+  background: rgba(0,0,0,0.6);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+small {
+  opacity: 0.7;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">📂 Stealth Cloud</div>
+<div class="header">📁 Stealth Drive</div>
 
-<button class="logout" onclick="logout()">Logout</button>
-
-<div class="section-title">📱 Apps & APK</div>
-
-<div class="container">
-
-  <div class="card" onclick="openLink('LINK_SAFEFILES')">
-    <div class="icon">🔐</div>
-    <div class="name">SafeFiles APK</div>
-    <div class="desc">Encrypted file app</div>
-  </div>
-
-  <div class="card" onclick="openLink('LINK_AUTOVELOX')">
-    <div class="icon">🚗</div>
-    <div class="name">Autovelox</div>
-    <div class="desc">Speed radar alerts</div>
-  </div>
-
+<div class="upload">
+  <input type="file" id="fileInput">
+  <button onclick="uploadFile()">⬆ Upload</button>
 </div>
 
-<div class="section-title">📦 Backup</div>
-
-<div class="container">
-
-  <div class="card" onclick="openLink('LINK_BACKUP1')">
-    <div class="icon">📦</div>
-    <div class="name">Backup 2026</div>
-    <div class="desc">Encrypted data</div>
-  </div>
-
-</div>
-
-<div class="section-title">🛠 Tools</div>
-
-<div class="container">
-
-  <div class="card" onclick="openLink('LINK_TOOL1')">
-    <div class="icon">🧰</div>
-    <div class="name">Utility Tool</div>
-    <div class="desc">Various tools</div>
-  </div>
-
-</div>
+<div class="container" id="fileList"></div>
 
 <script>
 const firebaseConfig = {
@@ -143,19 +78,49 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-firebase.auth().onAuthStateChanged((user) => {
-  if (!user) {
-    window.location.href = "login.html";
-  }
+const auth = firebase.auth();
+const storage = firebase.storage();
+
+auth.onAuthStateChanged(user => {
+  if (!user) window.location.href = "login.html";
+  loadFiles();
 });
 
-function openLink(link) {
-  window.open(link, "_blank");
+// 📤 UPLOAD
+function uploadFile() {
+  const file = document.getElementById("fileInput").files[0];
+  if (!file) return;
+
+  const ref = storage.ref("StealthFiles/" + file.name);
+
+  ref.put(file).then(() => {
+    alert("Upload completato 🔥");
+    loadFiles();
+  });
 }
 
-function logout() {
-  firebase.auth().signOut().then(() => {
-    window.location.href = "login.html";
+// 📥 LISTA FILE
+function loadFiles() {
+  const list = document.getElementById("fileList");
+  list.innerHTML = "";
+
+  storage.ref("StealthFiles").listAll().then(res => {
+    res.items.forEach(item => {
+
+      item.getDownloadURL().then(url => {
+
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+          📄 <b>${item.name}</b><br>
+          <small onclick="window.open('${url}')">⬇ Download</small>
+        `;
+
+        list.appendChild(div);
+      });
+
+    });
   });
 }
 </script>
