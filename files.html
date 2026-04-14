@@ -1,16 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-  <title>Files</title>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stealth Files</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f2027;
+  color: white;
+}
+
+/* HEADER */
+.header {
+  padding: 15px;
+  text-align: center;
+  background: #000;
+  font-size: 20px;
+}
+
+/* GRID */
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  padding: 15px;
+}
+
+/* CARD */
+.card {
+  background: rgba(0,0,0,0.7);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card:hover {
+  background: rgba(0,255,150,0.2);
+}
+
+/* ICONA */
+.icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+/* LOGOUT */
+.logout {
+  margin: 10px;
+  padding: 10px;
+  background: red;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  width: calc(100% - 20px);
+  font-size: 16px;
+}
+</style>
 </head>
-<body style="text-align:center;">
 
-<h2>📂 I tuoi file</h2>
+<body>
 
-<div id="content" style="display:none;">
-  <a href="https://drive.google.com/drive/folders/1Yy_IcwzfU1L8hc38Q_zyohMZ9geBaYIk?hl=it">Apri File</a>
+<div class="header">📂 Stealth Files</div>
+
+<button class="logout" onclick="logout()">Logout</button>
+
+<div class="container">
+
+  <!-- APK -->
+  <div class="card" onclick="openLink('https://drive.google.com/drive/folders/14K0AnZAqGmutBPni-yf3c2pviir94qHt?hl=it')">
+    <div class="icon">📱</div>
+    <div>APK</div>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="card" onclick="openLink('https://drive.google.com/drive/folders/16fgTGXOxwcb4bOGi7RVp0CeRVO6UUi4I?hl=it')">
+    <div class="icon">📦</div>
+    <div>Backups</div>
+  </div>
+
+  <!-- RELEASE -->
+  <div class="card" onclick="openLink('https://drive.google.com/drive/folders/1D5U8BIZkymENuTVV48rIqqzBGKlOVqVD?hl=it')">
+    <div class="icon">🚀</div>
+    <div>Releases</div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="card" onclick="openLink('https://drive.google.com/drive/folders/1UlKcbTf5sthgnBceC_ouQALY3lp-l-lb?hl=it')">
+    <div class="icon">🛠</div>
+    <div>Tools</div>
+  </div>
+
 </div>
 
 <script>
@@ -24,24 +112,26 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-</script>
-<script>
+
+// 🔐 controllo login
 firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    document.getElementById("content").style.display = "block";
-  } else {
+  if (!user) {
     window.location.href = "login.html";
   }
 });
-</script>
-<button onclick="logout()">Logout</button>
 
-<script>
+// 🔗 apri link
+function openLink(link) {
+  window.open(link, "_blank");
+}
+
+// 🚪 logout
 function logout() {
   firebase.auth().signOut().then(() => {
     window.location.href = "login.html";
   });
 }
 </script>
+
 </body>
 </html>
