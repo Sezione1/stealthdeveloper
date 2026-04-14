@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Stealth Login</title>
 
 <!-- Firebase -->
@@ -30,7 +31,10 @@ body {
   box-shadow: 0 0 20px rgba(0,255,0,0.2);
   text-align: center;
 }
-
+.container {
+  position: relative;
+  z-index: 1;
+}
 h2 {
   margin-bottom: 20px;
 }
@@ -80,7 +84,7 @@ body::before {
   height: 100%;
   background: url("https://www.transparenttextures.com/patterns/asfalt-light.png");
   opacity: 0.05;
-  pointer-events: none; /* 🔥 QUESTA È
+  pointer-events: none; /* 🔥 QUESTA È LA FIX */
 }
 </style>
 </head>
