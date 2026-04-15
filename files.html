@@ -249,7 +249,7 @@
                         row.innerHTML = `
           <span onclick="openFile('${url}','${item.name}')">${name}</span>
           <div class="actions">
-            <button onclick="downloadFile('${url},'${item.name}')">⬇</button>
+            <button onclick="downloadFile('${url}', '${item.name}')">⬇</button>
             <button onclick="deleteFile('${item.fullPath}')">🗑</button>
           </div>
         `;
@@ -264,19 +264,26 @@
         async function downloadFile(url, filename) {
             if (!confirm("Scaricare file?")) return;
 
-            const response = await fetch(url);
-            const blob = await response.blob();
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
 
-            const blobUrl = window.URL.createObjectURL(blob);
+                const blobUrl = window.URL.createObjectURL(blob);
 
-            const a = document.createElement("a");
-            a.href = blobUrl;
-            a.download = filename || "file";
-            document.body.appendChild(a);
-            a.click();
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = filename || "file";
 
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                window.URL.revokeObjectURL(blobUrl);
+
+            } catch (e) {
+                alert("Errore download file");
+                console.error(e);
+            }
         }
 
         // 🗑 DELETE
