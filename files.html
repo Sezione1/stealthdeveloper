@@ -261,10 +261,10 @@
         }
 
         // ⬇ DOWNLOAD
-        async function downloadFile(path, filename) {
+        async function downloadFile(url, filename) {
             if (!confirm("Scaricare file?")) return;
 
-            const url = await storage.ref(path).getDownloadURL();
+            //const url = await storage.ref(path).getDownloadURL();
 
             const xhr = new XMLHttpRequest();
             xhr.responseType = "blob";
