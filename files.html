@@ -261,28 +261,17 @@
         }
 
         // ⬇ DOWNLOAD
-        async function downloadFile(url, filename) {
+        function downloadFile(url, filename) {
             if (!confirm("Scaricare file?")) return;
 
-            try {
-                const response = await fetch(url, { mode: "cors" });
-                const blob = await response.blob();
+            const a = document.createElement("a");
+            a.href = url;
+            a.target = "_blank";
+            a.rel = "noopener";
 
-                const blobUrl = window.URL.createObjectURL(blob);
-
-                const a = document.createElement("a");
-                a.href = blobUrl;
-                a.download = filename || "file";
-                document.body.appendChild(a);
-                a.click();
-
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(blobUrl);
-
-            } catch (e) {
-                console.error(e);
-                alert("Download fallito (CORS o Firebase rules)");
-            }
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
         // 🗑 DELETE
         function deleteFile(path) {
