@@ -261,17 +261,28 @@
         }
 
         // ⬇ DOWNLOAD
-        function downloadFile(url, filename) {
+        async function downloadFile(path, filename) {
             if (!confirm("Scaricare file?")) return;
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.target = "_blank";
-            a.rel = "noopener";
+            const url = await storage.ref(path).getDownloadURL();
 
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = "blob";
+
+            xhr.onload = () => {
+                const blobUrl = window.URL.createObjectURL(xhr.response);
+
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.click();
+                a.click();
+
+                window.URL.revokeObjectURL(blobUrl);
+            };
+
+            xhr.open("GET", url);
+            xhr.send();
         }
         // 🗑 DELETE
         function deleteFile(path) {
