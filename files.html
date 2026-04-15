@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stealth Drive</title>
+<title>Stealth Files</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -11,68 +11,116 @@
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial;
-  background: #0f2027;
-  color: white;
+  margin:0;
+  font-family:Arial;
+  background:#0f2027;
+  color:white;
 }
 
+/* HEADER */
 .header {
-  padding: 15px;
-  background: #000;
-  text-align: center;
+  padding:15px;
+  text-align:center;
+  background:#000;
+  font-size:20px;
 }
 
-.upload {
-  padding: 15px;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: #00ff99;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-
+/* GRID CARTELLE */
 .container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
-  padding: 15px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:15px;
+  padding:15px;
 }
 
 .card {
-  background: rgba(0,0,0,0.6);
-  padding: 15px;
-  border-radius: 10px;
-  text-align: center;
+  background:rgba(0,0,0,0.7);
+  border-radius:12px;
+  padding:20px;
+  text-align:center;
+  cursor:pointer;
 }
 
-small {
-  opacity: 0.7;
+.icon { font-size:40px; }
+
+/* LISTA FILE */
+.fileList {
+  padding:10px;
+}
+
+.fileRow {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.6);
+  margin:5px 0;
+  padding:10px;
+  border-radius:8px;
+}
+
+.actions button {
+  margin-left:5px;
+  border:none;
+  border-radius:6px;
+  padding:5px 8px;
+}
+
+/* UPLOAD */
+.uploadBox {
+  padding:10px;
+}
+
+.progress {
+  height:6px;
+  background:#333;
+  margin-top:5px;
+  border-radius:4px;
+}
+
+.bar {
+  height:6px;
+  background:#00ff99;
+  width:0%;
+}
+
+/* BOTTONI */
+.btn {
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#00ff99;
+  font-weight:bold;
+}
+
+.back {
+  margin:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">📁 Stealth Drive</div>
+<div class="header">📂 Stealth Files</div>
 
-<div class="upload">
+<button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Torna</button>
+
+<!-- UPLOAD -->
+<div class="uploadBox" id="uploadBox" style="display:none;">
   <input type="file" id="fileInput">
-  <button onclick="uploadFile()">⬆ Upload</button>
+  <div id="fileInfo"></div>
+  <button class="btn" onclick="uploadFile()">⬆ Upload</button>
+  <div class="progress"><div class="bar" id="progressBar"></div></div>
 </div>
 
-<div class="container" id="fileList"></div>
+<!-- CARTELLE -->
+<div class="container" id="folders"></div>
+
+<!-- FILE -->
+<div class="fileList" id="files" style="display:none;"></div>
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyAClXwYAbKBec_Mc6XQT9ttNCQJTwlV2UU",
+  apiKey: "AIza...",
   authDomain: "stealthdeveloperfiles.firebaseapp.com",
   projectId: "stealthdeveloperfiles",
   storageBucket: "stealthdeveloperfiles.firebasestorage.app",
@@ -85,47 +133,135 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const storage = firebase.storage();
 
-auth.onAuthStateChanged(user => {
-  if (!user) window.location.href = "login.html";
-  loadFiles();
+let currentFolder = "";
+
+// LOGIN CHECK
+auth.onAuthStateChanged(user=>{
+  if(!user) window.location.href="login.html";
+  loadFolders();
 });
 
-// 📤 UPLOAD
-function uploadFile() {
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) return;
+// 📂 CARICA CARTELLE
+function loadFolders(){
+  const container = document.getElementById("folders");
+  container.innerHTML="";
 
-  const ref = storage.ref("StealthFiles/" + file.name);
-
-  ref.put(file).then(() => {
-    alert("Upload completato 🔥");
-    loadFiles();
+  storage.ref("StealthFiles").listAll().then(res=>{
+    res.prefixes.forEach(folder=>{
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`<div class="icon">📁</div>${folder.name}`;
+      div.onclick=()=>openFolder(folder.name);
+      container.appendChild(div);
+    });
   });
 }
 
-// 📥 LISTA FILE
-function loadFiles() {
-  const list = document.getElementById("fileList");
-  list.innerHTML = "";
+// 📂 APRI CARTELLA
+function openFolder(name){
+  currentFolder=name;
 
-  storage.ref("StealthFiles").listAll().then(res => {
-    res.items.forEach(item => {
+  document.getElementById("folders").style.display="none";
+  document.getElementById("files").style.display="block";
+  document.getElementById("backBtn").style.display="block";
+  document.getElementById("uploadBox").style.display="block";
 
-      item.getDownloadURL().then(url => {
+  loadFiles();
+}
 
-        const div = document.createElement("div");
-        div.className = "card";
+// 🔙 TORNA
+function goBack(){
+  document.getElementById("folders").style.display="grid";
+  document.getElementById("files").style.display="none";
+  document.getElementById("backBtn").style.display="none";
+  document.getElementById("uploadBox").style.display="none";
+}
 
-        div.innerHTML = `
-          📄 <b>${item.name}</b><br>
-          <small onclick="window.open('${url}')">⬇ Download</small>
+// 📄 CARICA FILE
+function loadFiles(){
+  const list=document.getElementById("files");
+  list.innerHTML="";
+
+  storage.ref("StealthFiles/"+currentFolder).listAll().then(res=>{
+    res.items.forEach(item=>{
+      item.getDownloadURL().then(url=>{
+
+        let name=item.name;
+        if(name.length>20){
+          name=name.substring(0,10)+"..."+name.slice(-7);
+        }
+
+        const row=document.createElement("div");
+        row.className="fileRow";
+
+        row.innerHTML=`
+          <span onclick="openFile('${url}','${item.name}')">${name}</span>
+          <div class="actions">
+            <button onclick="downloadFile('${url}')">⬇</button>
+            <button onclick="deleteFile('${item.fullPath}')">🗑</button>
+          </div>
         `;
 
-        list.appendChild(div);
+        list.appendChild(row);
       });
-
     });
   });
+}
+
+// ⬇ DOWNLOAD
+function downloadFile(url){
+  if(confirm("Scaricare file?")){
+    window.open(url);
+  }
+}
+
+// 🗑 DELETE
+function deleteFile(path){
+  if(confirm("Eliminare file?")){
+    storage.ref(path).delete().then(()=>{
+      loadFiles();
+    });
+  }
+}
+
+// 👁 OPEN FILE
+function openFile(url,name){
+  if(name.match(/\.(jpg|png|gif)$/)){
+    window.open(url);
+  } else if(name.match(/\.(mp4|webm)$/)){
+    window.open(url);
+  } else {
+    window.open(url);
+  }
+}
+
+// 📎 FILE INFO
+document.getElementById("fileInput").addEventListener("change",()=>{
+  const f=document.getElementById("fileInput").files[0];
+  if(!f) return;
+  document.getElementById("fileInfo").innerText=
+    f.name+" ("+(f.size/1024/1024).toFixed(2)+" MB)";
+});
+
+// ⬆ UPLOAD
+function uploadFile(){
+  const file=document.getElementById("fileInput").files[0];
+  if(!file) return;
+
+  const ref=storage.ref("StealthFiles/"+currentFolder+"/"+file.name);
+  const task=ref.put(file);
+
+  task.on("state_changed",
+    snap=>{
+      let p=(snap.bytesTransferred/snap.totalBytes)*100;
+      document.getElementById("progressBar").style.width=p+"%";
+    },
+    err=>alert("Errore upload"),
+    ()=>{
+      alert("Upload completato");
+      loadFiles();
+    }
+  );
 }
 </script>
 
