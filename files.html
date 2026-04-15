@@ -1,207 +1,252 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stealth Files</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stealth Files</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
-<style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:#0f2027;
-  color:white;
-}
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #0f2027;
+            color: white;
+        }
 
-/* HEADER */
-.header {
-  padding:15px;
-  text-align:center;
-  background:#000;
-  font-size:20px;
-}
+        /* HEADER */
+        .header {
+            padding: 15px;
+            text-align: center;
+            background: #000;
+            font-size: 20px;
+        }
 
-/* GRID CARTELLE */
-.container {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:15px;
-  padding:15px;
-}
+        /* GRID CARTELLE */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
 
-.card {
-  background:rgba(0,0,0,0.7);
-  border-radius:12px;
-  padding:20px;
-  text-align:center;
-  cursor:pointer;
-}
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
 
-.icon { font-size:40px; }
+        .icon {
+            font-size: 40px;
+        }
 
-/* LISTA FILE */
-.fileList {
-  padding:10px;
-}
+        /* LISTA FILE */
+        .fileList {
+            padding: 10px;
+        }
 
-.fileRow {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(0,0,0,0.6);
-  margin:5px 0;
-  padding:10px;
-  border-radius:8px;
-}
+        .fileRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
 
-.actions button {
-  margin-left:5px;
-  border:none;
-  border-radius:6px;
-  padding:5px 8px;
-}
+        .actions button {
+            margin-left: 5px;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 8px;
+        }
 
-/* UPLOAD */
-.uploadBox {
-  padding:10px;
-}
+        /* UPLOAD */
+        .uploadBox {
+            padding: 10px;
+        }
 
-.progress {
-  height:6px;
-  background:#333;
-  margin-top:5px;
-  border-radius:4px;
-}
+        .progress {
+            height: 6px;
+            background: #333;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
 
-.bar {
-  height:6px;
-  background:#00ff99;
-  width:0%;
-}
+        .bar {
+            height: 6px;
+            background: #00ff99;
+            width: 0%;
+        }
 
-/* BOTTONI */
-.btn {
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  background:#00ff99;
-  font-weight:bold;
-}
+        /* BOTTONI */
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #00ff99;
+            font-weight: bold;
+        }
 
-.back {
-  margin:10px;
-}
-</style>
+        .back {
+            margin: 10px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #00ff99, #00ccff);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            color: black;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .upload-btn:hover {
+            opacity: 0.8;
+        }
+
+        #fileInfo {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        progress {
+            width: 100%;
+            height: 8px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="header">📂 Stealth Files</div>
+    <div class="header">📂 Stealth Files</div>
 
-<button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Torna</button>
+    <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Torna</button>
 
-<!-- UPLOAD -->
-<div class="uploadBox" id="uploadBox" style="display:none;">
-  <input type="file" id="fileInput">
-  <div id="fileInfo"></div>
-  <button class="btn" onclick="uploadFile()">⬆ Upload</button>
-  <div class="progress"><div class="bar" id="progressBar"></div></div>
-</div>
+    <!-- UPLOAD -->
+    <div class="uploadBox" id="uploadBox" style="display:none;">
 
-<!-- CARTELLE -->
-<div class="container" id="folders"></div>
+        <input type="file" id="fileInput" hidden>
 
-<!-- FILE -->
-<div class="fileList" id="files" style="display:none;"></div>
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            📁 Scegli file
+        </button>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAClXwYAbKBec_Mc6XQT9ttNCQJTwlV2UU",
-  authDomain: "stealthdeveloperfiles.firebaseapp.com",
-  projectId: "stealthdeveloperfiles",
-  storageBucket: "stealthdeveloperfiles.firebasestorage.app",
-  messagingSenderId: "918965438979",
-  appId: "1:918965438979:web:6634ab5caf697c116d9c36"
-};
+        <div id="fileInfo"></div>
 
-firebase.initializeApp(firebaseConfig);
+        <div id="progressContainer" style="display:none;">
+            <progress id="progressBar" value="0" max="100"></progress>
+        </div>
 
-const auth = firebase.auth();
-const storage = firebase.storage();
+        <button class="upload-btn" onclick="uploadFile()">
+            ⬆ Upload
+        </button>
 
-let currentFolder = "";
+    </div>
 
-// LOGIN CHECK
-auth.onAuthStateChanged(user=>{
-  if(user){
-    loadFolders();
-  } else {
-    setTimeout(()=>{
-      if(!auth.currentUser){
-        window.location.href="login.html";
-      }
-    }, 500);
-  }
-});
+    <!-- CARTELLE -->
+    <div class="container" id="folders"></div>
 
-// 📂 CARICA CARTELLE
-function loadFolders(){
-  const container = document.getElementById("folders");
-  container.innerHTML="";
+    <!-- FILE -->
+    <div class="fileList" id="files" style="display:none;"></div>
 
-  storage.ref("StealthFiles").listAll().then(res=>{
-    res.prefixes.forEach(folder=>{
-      const div=document.createElement("div");
-      div.className="card";
-      div.innerHTML=`<div class="icon">📁</div>${folder.name}`;
-      div.onclick=()=>openFolder(folder.name);
-      container.appendChild(div);
-    });
-  });
-}
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAClXwYAbKBec_Mc6XQT9ttNCQJTwlV2UU",
+            authDomain: "stealthdeveloperfiles.firebaseapp.com",
+            projectId: "stealthdeveloperfiles",
+            storageBucket: "stealthdeveloperfiles.firebasestorage.app",
+            messagingSenderId: "918965438979",
+            appId: "1:918965438979:web:6634ab5caf697c116d9c36"
+        };
 
-// 📂 APRI CARTELLA
-function openFolder(name){
-  currentFolder=name;
+        firebase.initializeApp(firebaseConfig);
 
-  document.getElementById("folders").style.display="none";
-  document.getElementById("files").style.display="block";
-  document.getElementById("backBtn").style.display="block";
-  document.getElementById("uploadBox").style.display="block";
+        const auth = firebase.auth();
+        const storage = firebase.storage();
 
-  loadFiles();
-}
+        let currentFolder = "";
 
-// 🔙 TORNA
-function goBack(){
-  document.getElementById("folders").style.display="grid";
-  document.getElementById("files").style.display="none";
-  document.getElementById("backBtn").style.display="none";
-  document.getElementById("uploadBox").style.display="none";
-}
+        // LOGIN CHECK
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loadFolders();
+            } else {
+                setTimeout(() => {
+                    if (!auth.currentUser) {
+                        window.location.href = "login.html";
+                    }
+                }, 500);
+            }
+        });
 
-// 📄 CARICA FILE
-function loadFiles(){
-  const list=document.getElementById("files");
-  list.innerHTML="";
+        // 📂 CARICA CARTELLE
+        function loadFolders() {
+            const container = document.getElementById("folders");
+            container.innerHTML = "";
 
-  storage.ref("StealthFiles/"+currentFolder).listAll().then(res=>{
-    res.items.forEach(item=>{
-      item.getDownloadURL().then(url=>{
-
-        let name=item.name;
-        if(name.length>20){
-          name=name.substring(0,10)+"..."+name.slice(-7);
+            storage.ref("StealthFiles").listAll().then(res => {
+                res.prefixes.forEach(folder => {
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    div.innerHTML = `<div class="icon">📁</div>${folder.name}`;
+                    div.onclick = () => openFolder(folder.name);
+                    container.appendChild(div);
+                });
+            });
         }
 
-        const row=document.createElement("div");
-        row.className="fileRow";
+        // 📂 APRI CARTELLA
+        function openFolder(name) {
+            currentFolder = name;
 
-        row.innerHTML=`
+            document.getElementById("folders").style.display = "none";
+            document.getElementById("files").style.display = "block";
+            document.getElementById("backBtn").style.display = "block";
+            document.getElementById("uploadBox").style.display = "block";
+            // 🔥 RESET QUI
+            resetUploadUI();
+            loadFiles();
+        }
+
+        // 🔙 TORNA
+        function goBack() {
+            document.getElementById("folders").style.display = "grid";
+            document.getElementById("files").style.display = "none";
+            document.getElementById("backBtn").style.display = "none";
+            document.getElementById("uploadBox").style.display = "none";
+        }
+
+        // 📄 CARICA FILE
+        function loadFiles() {
+            const list = document.getElementById("files");
+            list.innerHTML = "";
+
+            storage.ref("StealthFiles/" + currentFolder).listAll().then(res => {
+                res.items.forEach(item => {
+                    item.getDownloadURL().then(url => {
+
+                        let name = item.name;
+                        if (name.length > 20) {
+                            name = name.substring(0, 10) + "..." + name.slice(-7);
+                        }
+
+                        const row = document.createElement("div");
+                        row.className = "fileRow";
+
+                        row.innerHTML = `
           <span onclick="openFile('${url}','${item.name}')">${name}</span>
           <div class="actions">
             <button onclick="downloadFile('${url}')">⬇</button>
@@ -209,68 +254,87 @@ function loadFiles(){
           </div>
         `;
 
-        list.appendChild(row);
-      });
-    });
-  });
-}
+                        list.appendChild(row);
+                    });
+                });
+            });
+        }
 
-// ⬇ DOWNLOAD
-function downloadFile(url){
-  if(confirm("Scaricare file?")){
-    window.open(url);
-  }
-}
+        // ⬇ DOWNLOAD
+        function downloadFile(url) {
+            if (confirm("Scaricare file?")) {
+                window.open(url);
+            }
+        }
 
-// 🗑 DELETE
-function deleteFile(path){
-  if(confirm("Eliminare file?")){
-    storage.ref(path).delete().then(()=>{
-      loadFiles();
-    });
-  }
-}
+        // 🗑 DELETE
+        function deleteFile(path) {
+            if (confirm("Eliminare file?")) {
+                storage.ref(path).delete().then(() => {
+                    loadFiles();
+                });
+            }
+        }
 
-// 👁 OPEN FILE
-function openFile(url,name){
-  if(name.match(/\.(jpg|png|gif)$/)){
-    window.open(url);
-  } else if(name.match(/\.(mp4|webm)$/)){
-    window.open(url);
-  } else {
-    window.open(url);
-  }
-}
+        // 👁 OPEN FILE
+        function openFile(url, name) {
+            if (name.match(/\.(jpg|png|gif)$/)) {
+                window.open(url);
+            } else if (name.match(/\.(mp4|webm)$/)) {
+                window.open(url);
+            } else {
+                window.open(url);
+            }
+        }
 
-// 📎 FILE INFO
-document.getElementById("fileInput").addEventListener("change",()=>{
-  const f=document.getElementById("fileInput").files[0];
-  if(!f) return;
-  document.getElementById("fileInfo").innerText=
-    f.name+" ("+(f.size/1024/1024).toFixed(2)+" MB)";
-});
+        // 📎 FILE INFO
+        document.getElementById("fileInput").addEventListener("change", () => {
+            const f = document.getElementById("fileInput").files[0];
+            if (!f) return;
+            document.getElementById("fileInfo").innerText =
+                f.name + " (" + (f.size / 1024 / 1024).toFixed(2) + " MB)";
+        });
 
-// ⬆ UPLOAD
-function uploadFile(){
-  const file=document.getElementById("fileInput").files[0];
-  if(!file) return;
+        // ⬆ UPLOAD
+        function uploadFile() {
+            const file = document.getElementById("fileInput").files[0];
+            if (!file) return;
 
-  const ref=storage.ref("StealthFiles/"+currentFolder+"/"+file.name);
-  const task=ref.put(file);
+            const ref = storage.ref("StealthFiles/" + currentFolder + "/" + file.name);
+            const task = ref.put(file);
+            document.getElementById("progressContainer").style.display = "block";
+            task.on("state_changed",
+                snap => {
+                    let p = (snap.bytesTransferred / snap.totalBytes) * 100;
+                    document.getElementById("progressBar").style.width = p + "%";
+                },
+                err => alert("Errore upload"),
+                () => {
+                    alert("Upload completato");
+                    loadFiles();
+                    // ✅ RESET DOPO 1 SECONDO
+                    setTimeout(() => {
+                        resetUploadUI();
+                    }, 1000);
+                }
+            );
+        }
+        function resetUploadUI() {
+            document.getElementById("fileInput").value = "";
+            document.getElementById("fileInfo").innerText = "";
+            document.getElementById("progressBar").value = 0;
+            document.getElementById("progressContainer").style.display = "none";
+        }
+        document.getElementById("fileInput").addEventListener("change", function () {
+            const file = this.files[0];
 
-  task.on("state_changed",
-    snap=>{
-      let p=(snap.bytesTransferred/snap.totalBytes)*100;
-      document.getElementById("progressBar").style.width=p+"%";
-    },
-    err=>alert("Errore upload"),
-    ()=>{
-      alert("Upload completato");
-      loadFiles();
-    }
-  );
-}
-</script>
+            if (file) {
+                document.getElementById("fileInfo").innerText =
+                    "📄 " + file.name + " (" + Math.round(file.size / 1024) + " KB)";
+            }
+        });
+    </script>
 
 </body>
+
 </html>
