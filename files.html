@@ -264,24 +264,35 @@
         async function downloadFile(url, filename) {
             if (!confirm("Scaricare file?")) return;
 
-            //const url = await storage.ref(path).getDownloadURL();
-
             const xhr = new XMLHttpRequest();
             xhr.responseType = "blob";
 
-            xhr.onload = () => {
-                const blobUrl = window.URL.createObjectURL(xhr.response);
+            xhr.onload = function () {
+
+                if (xhr.status !== 200) {
+                    alert("Errore download: " + xhr.status);
+                    return;
+                }
+
+                const blob = xhr.response;
+                const blobUrl = window.URL.createObjectURL(blob);
 
                 const a = document.createElement("a");
                 a.href = blobUrl;
-                a.download = filename;
-                document.body.click();
+                a.download = filename || "file";
+
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
 
                 window.URL.revokeObjectURL(blobUrl);
             };
 
-            xhr.open("GET", url);
+            xhr.onerror = function () {
+                alert("Errore rete o CORS Firebase");
+            };
+
+            xhr.open("GET", url, true);
             xhr.send();
         }
         // 🗑 DELETE
