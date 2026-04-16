@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stealth Files</title>
-
+    <link rel="icon" href="logo.png">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
@@ -55,18 +55,48 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.6);
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 8px;
+            background: #161b22;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+
+        .fileRow:hover {
+            background: #21262d;
+            transform: translateY(-1px);
+        }
+
+        .fileName {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
         }
 
         .actions button {
-            margin-left: 5px;
+            width: 34px;
+            height: 34px;
             border: none;
-            border-radius: 6px;
-            padding: 5px 8px;
+            border-radius: 8px;
+            background: #30363d;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
         }
+
+        .actions button:hover {
+            background: #58a6ff;
+        }
+
+
 
         /* UPLOAD */
         .uploadBox {
@@ -247,13 +277,14 @@
                         row.className = "fileRow";
 
                         row.innerHTML = `
-          <span onclick="openFile('${url}','${item.name}')">${name}</span>
-          <div class="actions">
-            <button onclick="downloadFile('${url}', '${item.name}')">⬇</button>
-            <button onclick="deleteFile('${item.fullPath}')">🗑</button>
-          </div>
-        `;
+                        <div class="fileName" onclick="openFile('${url}','${item.name}')">${name}</div>
 
+                        <div class="actions">
+                        <button onclick="downloadFile('${url}','${item.name}')">⬇</button>
+                        <button onclick="copyLink('${url}')">🔗</button>
+                        <button onclick="deleteFile('${item.fullPath}')">🗑</button>
+                        </div>
+                        `;
                         list.appendChild(row);
                     });
                 });
@@ -347,6 +378,11 @@
                     "📄 " + file.name + " (" + Math.round(file.size / 1024) + " KB)";
             }
         });
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert("Link copiato");
+            });
+        }
     </script>
 
 </body>
