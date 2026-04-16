@@ -261,41 +261,23 @@
         }
 
         // ⬇ DOWNLOAD
-        function downloadFile(url, filename) {
+        async function downloadFile(url, filename) {
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
 
-            if (!confirm("Scaricare file?")) return;
+                const blobUrl = URL.createObjectURL(blob);
 
-            let finalName = filename.toLowerCase();
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = filename;
+                a.click();
 
-            const problematiche = [
-                ".mp4", ".pdf", ".jpg", ".jpeg",
-                ".png", ".gif", ".webp",
-                ".mp3", ".wav", ".txt"
-            ];
+                URL.revokeObjectURL(blobUrl);
 
-            let fake = false;
-
-            for (let ext of problematiche) {
-                if (finalName.endsWith(ext)) {
-                    finalName = filename + ".bin";
-                    fake = true;
-                    break;
-                }
-            }
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = finalName;
-            a.target = "_blank";
-
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            if (fake) {
-                setTimeout(() => {
-                    alert("File scaricato come '" + finalName + "'\nRinominalo togliendo .bin");
-                }, 500);
+            } catch (e) {
+                alert("Errore download");
+                console.log(e);
             }
         }
         // 🗑 DELETE
