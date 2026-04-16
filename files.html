@@ -163,7 +163,7 @@
 
     <div class="header">📂 Stealth Files</div>
 
-    <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Torna</button>
+    <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
 
     <!-- UPLOAD -->
     <div class="uploadBox" id="uploadBox" style="display:none;">
@@ -171,7 +171,7 @@
         <input type="file" id="fileInput" hidden>
 
         <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-            📁 Scegli file
+            📁 Choose file
         </button>
 
         <div id="fileInfo"></div>
@@ -280,7 +280,7 @@
                         <div class="fileName" onclick="openFile('${url}','${item.name}')">${name}</div>
 
                         <div class="actions">
-                        <button onclick="downloadFile('${url}','${item.name}')">⬇</button>
+                        <button onclick="downloadFile('${url}','${item.name}')">📥</button>
                         <button onclick="copyLink('${url}')">🔗</button>
                         <button onclick="deleteFile('${item.fullPath}')">🗑</button>
                         </div>
