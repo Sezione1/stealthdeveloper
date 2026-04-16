@@ -262,17 +262,41 @@
 
         // ⬇ DOWNLOAD
         function downloadFile(url, filename) {
+
             if (!confirm("Scaricare file?")) return;
+
+            let finalName = filename.toLowerCase();
+
+            const problematiche = [
+                ".mp4", ".pdf", ".jpg", ".jpeg",
+                ".png", ".gif", ".webp",
+                ".mp3", ".wav", ".txt"
+            ];
+
+            let fake = false;
+
+            for (let ext of problematiche) {
+                if (finalName.endsWith(ext)) {
+                    finalName = filename + ".bin";
+                    fake = true;
+                    break;
+                }
+            }
 
             const a = document.createElement("a");
             a.href = url;
+            a.download = finalName;
             a.target = "_blank";
-            a.rel = "noopener";
-            a.download = filename;
 
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+
+            if (fake) {
+                setTimeout(() => {
+                    alert("File scaricato come '" + finalName + "'\nRinominalo togliendo .bin");
+                }, 500);
+            }
         }
         // 🗑 DELETE
         function deleteFile(path) {
