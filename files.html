@@ -386,7 +386,7 @@
 
         // ⬇ DOWNLOAD
         async function downloadFile(url, filename) {
-            if (!confirm("Scaricare file?")) return;
+            if (!confirm("Download files?")) return;
             try {
                 const response = await fetch(url);
                 const blob = await response.blob();
@@ -407,7 +407,7 @@
         }
         // 🗑 DELETE
         function deleteFile(path) {
-            if (confirm("Eliminare file?")) {
+            if (confirm("Delete files?")) {
                 storage.ref(path).delete().then(() => {
                     loadFiles();
                 });
@@ -438,11 +438,11 @@
             task.on("state_changed",
                 snap => {
                     let p = (snap.bytesTransferred / snap.totalBytes) * 100;
-                    document.getElementById("progressBar").value = p + "%";
+                    document.getElementById("progressBar").style.width = p + "%";
                 },
-                err => alert("Errore upload"),
+                err => alert("Upload error"),
                 () => {
-                    alert("Upload completato");
+                    alert("Upload complete");
                     loadFiles();
                     // ✅ RESET DOPO 1 SECONDO
                     setTimeout(() => {
@@ -467,7 +467,7 @@
         });
         function copyLink(url) {
             navigator.clipboard.writeText(url).then(() => {
-                alert("Link copiato");
+                alert("Link copied");
             });
         }
         window.onpopstate = function () {
