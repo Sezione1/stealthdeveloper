@@ -56,10 +56,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             background: #161b22;
             padding: 12px;
             margin-bottom: 10px;
-            border-radius: 12px;
+            border-radius: 14px;
             transition: 0.2s;
         }
 
@@ -68,13 +69,76 @@
             transform: translateY(-1px);
         }
 
-        .fileName {
+        .leftSide {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             flex: 1;
-            overflow: hidden;
+            min-width: 0;
+        }
+
+        .fileIcon {
+            font-size: 26px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .fileInfo {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .fileName {
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
             cursor: pointer;
-            font-size: 15px;
+        }
+
+        .fileMeta {
+            font-size: 11px;
+            opacity: 0.65;
+            margin-top: 4px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .iconBtn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 10px;
+            background: #30363d;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .iconBtn:hover {
+            background: #58a6ff;
+        }
+
+        .danger:hover {
+            background: #da3633;
+        }
+
+        .sortBar {
+            margin: 10px 0;
+        }
+
+        .sortBar select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #161b22;
+            color: white;
+            font-size: 14px;
         }
 
         .actions {
@@ -189,6 +253,17 @@
 
     <!-- CARTELLE -->
     <div class="container" id="folders"></div>
+    <div class="sortBar">
+        <select id="sortSelect" onchange="loadFiles()">
+            <option value="new">Newest</option>
+            <option value="old">Oldest</option>
+            <option value="az">Name A-Z</option>
+            <option value="za">Name Z-A</option>
+            <option value="big">Size Big</option>
+            <option value="small">Size Small</option>
+            <option value="type">Type</option>
+        </select>
+    </div>
 
     <!-- FILE -->
     <div class="fileList" id="files" style="display:none;"></div>
@@ -261,35 +336,144 @@
         }
 
         // 📄 CARICA FILE
-        function loadFiles() {
+        async function loadFiles() {
+
             const list = document.getElementById("files");
+            list.innerHTML = "Loading...";
+
+            const folderRef = storage.ref("StealthFiles/" + currentFolder);
+            const res = await folderRef.listAll();
+
+            let files = [];
+
+            for (const item of res.items) {
+
+                const url = await item.getDownloadURL();
+                const meta = await item.getMetadata();
+
+                files.push({
+                    name: item.name,
+                    path: item.fullPath,
+                    url: url,
+                    meta: meta
+                });
+            }
+
+            // SORT MODE
+            const mode = document.getElementById("sortSelect").value;
+
+            files.sort((a, b) => {
+
+                if (mode == "new")
+                    return new Date(b.meta.timeCreated) - new Date(a.meta.timeCreated);
+
+                if (mode == "old")
+                    return new Date(a.meta.timeCreated) - new Date(b.meta.timeCreated);
+
+                if (mode == "az")
+                    return a.name.localeCompare(b.name);
+
+                if (mode == "za")
+                    return b.name.localeCompare(a.name);
+
+                if (mode == "big")
+                    return b.meta.size - a.meta.size;
+
+                if (mode == "small")
+                    return a.meta.size - b.meta.size;
+
+                if (mode == "type") {
+                    const extA = a.name.includes(".") ? a.name.split(".").pop().toLowerCase() : "";
+                    const extB = b.name.includes(".") ? b.name.split(".").pop().toLowerCase() : "";
+                    return extA.localeCompare(extB);
+                }
+
+                return 0;
+            });
+
             list.innerHTML = "";
 
-            storage.ref("StealthFiles/" + currentFolder).listAll().then(res => {
-                res.items.forEach(item => {
-                    item.getDownloadURL().then(url => {
+            files.forEach(file => {
 
-                        let name = item.name;
-                        if (name.length > 20) {
-                            name = name.substring(0, 10) + "..." + name.slice(-7);
-                        }
+                let fullName = file.name;
+                let shortName = fullName;
 
-                        const row = document.createElement("div");
-                        row.className = "fileRow";
+                if (shortName.length > 28) {
+                    shortName =
+                        shortName.substring(0, 18) +
+                        "..." +
+                        shortName.slice(-7);
+                }
 
-                        row.innerHTML = `
-                        <div class="fileName" onclick="openFile('${url}','${item.name}')">${name}</div>
+                const d = new Date(file.meta.timeCreated);
 
-                        <div class="actions">
-                        <button onclick="downloadFile('${url}','${item.name}')">📥</button>
-                        <button onclick="copyLink('${url}')">🔗</button>
-                        <button onclick="deleteFile('${item.fullPath}')">🗑</button>
-                        </div>
-                        `;
-                        list.appendChild(row);
-                    });
+                const data = d.toLocaleDateString();
+                const ora = d.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
+
+                let size;
+
+                if (file.meta.size >= 1024 * 1024) {
+                    size = (file.meta.size / 1024 / 1024).toFixed(1) + " MB";
+                } else {
+                    size = (file.meta.size / 1024).toFixed(0) + " KB";
+                }
+
+                let icon = "📄";
+
+                if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
+                else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
+                else if (fullName.match(/\.(mp3|wav|ogg)$/i)) icon = "🎵";
+                else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
+                else if (fullName.match(/\.(apk)$/i)) icon = "📱";
+                else if (fullName.match(/\.(exe)$/i)) icon = "💻";
+                else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
+                else if (fullName.match(/\.(doc|docx)$/i)) icon = "📘";
+                else if (fullName.match(/\.(xls|xlsx)$/i)) icon = "📗";
+
+                const row = document.createElement("div");
+                row.className = "fileRow";
+
+                row.innerHTML = `
+        <div class="leftSide">
+
+            <div class="fileIcon">${icon}</div>
+
+            <div class="fileInfo">
+
+                <div class="fileName"
+                onclick="openFile('${file.url}','${fullName}')">
+                ${shortName}
+                </div>
+
+                <div class="fileMeta">
+                    ${data} • ${ora} • ${size}
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button class="iconBtn"
+            onclick="downloadFile('${file.url}','${fullName}')">📥</button>
+
+            <button class="iconBtn"
+            onclick="copyLink('${file.url}')">🔗</button>
+
+            <button class="iconBtn danger"
+            onclick="deleteFile('${file.path}')">🗑</button>
+
+        </div>
+        `;
+
+                list.appendChild(row);
+
             });
+
         }
 
         // ⬇ DOWNLOAD
