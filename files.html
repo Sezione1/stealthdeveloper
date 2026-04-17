@@ -141,23 +141,6 @@
             background: #da3633;
         }
 
-        .actions button {
-            width: 34px;
-            height: 34px;
-            border: none;
-            border-radius: 8px;
-            background: #30363d;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        .actions button:hover {
-            background: #58a6ff;
-        }
-
-
-
         /* UPLOAD */
         .uploadBox {
             padding: 10px;
@@ -177,18 +160,6 @@
         }
 
         /* BOTTONI */
-        .btn {
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #00ff99;
-            font-weight: bold;
-        }
-
-        .back {
-            margin: 10px;
-        }
-
         .upload-btn {
             background: linear-gradient(45deg, #00ff99, #00ccff);
             border: none;
@@ -225,7 +196,6 @@
 
         <div class="header">📂 Stealth Files</div>
 
-        <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
 
         <!-- UPLOAD -->
         <div class="uploadBox" id="uploadBox" style="display:none;">
@@ -448,13 +418,7 @@
 
         // 👁 OPEN FILE
         function openFile(url, name) {
-            if (name.match(/\.(jpg|png|gif)$/)) {
-                window.open(url);
-            } else if (name.match(/\.(mp4|webm)$/)) {
-                window.open(url);
-            } else {
-                window.open(url);
-            }
+            window.open(url);
         }
 
         // 📎 FILE INFO
@@ -476,7 +440,7 @@
             task.on("state_changed",
                 snap => {
                     let p = (snap.bytesTransferred / snap.totalBytes) * 100;
-                    document.getElementById("progressBar").style.width = p + "%";
+                    document.getElementById("progressBar").value = p + "%";
                 },
                 err => alert("Errore upload"),
                 () => {
