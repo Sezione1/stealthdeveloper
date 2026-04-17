@@ -141,6 +141,23 @@
             background: #da3633;
         }
 
+        .actions button {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 8px;
+            background: #30363d;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .actions button:hover {
+            background: #58a6ff;
+        }
+
+
+
         /* UPLOAD */
         .uploadBox {
             padding: 10px;
@@ -233,6 +250,8 @@
 
         <!-- CARTELLE -->
         <div class="container" id="folders"></div>
+
+        <div id="files"></div>
 
     </div>
     <!-- FILE -->
@@ -428,8 +447,14 @@
         }
 
         // 👁 OPEN FILE
-        function openFile(url) {
-            window.open(url);
+        function openFile(url, name) {
+            if (name.match(/\.(jpg|png|gif)$/)) {
+                window.open(url);
+            } else if (name.match(/\.(mp4|webm)$/)) {
+                window.open(url);
+            } else {
+                window.open(url);
+            }
         }
 
         // 📎 FILE INFO
@@ -451,7 +476,7 @@
             task.on("state_changed",
                 snap => {
                     let p = (snap.bytesTransferred / snap.totalBytes) * 100;
-                    document.getElementById("progressBar").value = p + "%";
+                    document.getElementById("progressBar").style.width = p + "%";
                 },
                 err => alert("Errore upload"),
                 () => {
