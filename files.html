@@ -14,10 +14,25 @@
     <style>
         body {
             margin: 0;
+            height: 100vh;
+            overflow: hidden;
             font-family: Arial;
             background: #0f2027;
             color: white;
         }
+
+        .mainPage {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #files {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
 
         /* HEADER */
         .header {
@@ -128,7 +143,7 @@
         }
 
         .sortBar {
-            margin: 10px 0;
+            padding: 10px;
         }
 
         .sortBar select {
@@ -226,45 +241,51 @@
 
 <body>
 
-    <div class="header">📂 Stealth Files</div>
 
-    <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
+    <div class="mainPage">
 
-    <!-- UPLOAD -->
-    <div class="uploadBox" id="uploadBox" style="display:none;">
+        <div class="header">📂 Stealth Files</div>
 
-        <input type="file" id="fileInput" hidden>
+        <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
 
-        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-            📁 Choose file
-        </button>
+        <!-- UPLOAD -->
+        <div class="uploadBox" id="uploadBox" style="display:none;">
 
-        <div id="fileInfo"></div>
+            <input type="file" id="fileInput" hidden>
 
-        <div id="progressContainer" style="display:none;">
-            <progress id="progressBar" value="0" max="100"></progress>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                📁 Choose file
+            </button>
+
+            <div id="fileInfo"></div>
+
+            <div id="progressContainer" style="display:none;">
+                <progress id="progressBar" value="0" max="100"></progress>
+            </div>
+
+            <button class="upload-btn" onclick="uploadFile()">
+                ⬆ Upload
+            </button>
+
         </div>
 
-        <button class="upload-btn" onclick="uploadFile()">
-            ⬆ Upload
-        </button>
+        <!-- CARTELLE -->
+        <div class="container" id="folders"></div>
+        <div class="sortBar">
+            <select id="sortSelect" onchange="loadFiles()">
+                <option value="new">Newest</option>
+                <option value="old">Oldest</option>
+                <option value="az">Name A-Z</option>
+                <option value="za">Name Z-A</option>
+                <option value="big">Size Big</option>
+                <option value="small">Size Small</option>
+                <option value="type">Type</option>
+            </select>
+        </div>
+
+        <div id="files"></div>
 
     </div>
-
-    <!-- CARTELLE -->
-    <div class="container" id="folders"></div>
-    <div class="sortBar">
-        <select id="sortSelect" onchange="loadFiles()">
-            <option value="new">Newest</option>
-            <option value="old">Oldest</option>
-            <option value="az">Name A-Z</option>
-            <option value="za">Name Z-A</option>
-            <option value="big">Size Big</option>
-            <option value="small">Size Small</option>
-            <option value="type">Type</option>
-        </select>
-    </div>
-
     <!-- FILE -->
     <div class="fileList" id="files" style="display:none;"></div>
 
@@ -317,7 +338,8 @@
         // 📂 APRI CARTELLA
         function openFolder(name) {
             currentFolder = name;
-
+            document.getElementById("files").innerHTML =
+                '<div class="loadingBox">Loading files...</div>';
             document.getElementById("folders").style.display = "none";
             document.getElementById("files").style.display = "block";
             document.getElementById("backBtn").style.display = "block";
@@ -339,7 +361,7 @@
         async function loadFiles() {
 
             const list = document.getElementById("files");
-            list.innerHTML = "Loading...";
+            list.innerHTML = "";
 
             const folderRef = storage.ref("StealthFiles/" + currentFolder);
             const res = await folderRef.listAll();
