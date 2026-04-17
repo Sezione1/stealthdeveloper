@@ -141,22 +141,6 @@
             background: #da3633;
         }
 
-        .actions button {
-            width: 34px;
-            height: 34px;
-            border: none;
-            border-radius: 8px;
-            background: #30363d;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        .actions button:hover {
-            background: #58a6ff;
-        }
-
-
 
         /* UPLOAD */
         .uploadBox {
@@ -177,18 +161,7 @@
         }
 
         /* BOTTONI */
-        .btn {
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #00ff99;
-            font-weight: bold;
-        }
-
-        .back {
-            margin: 10px;
-        }
-
+    
         .upload-btn {
             background: linear-gradient(45deg, #00ff99, #00ccff);
             border: none;
@@ -225,8 +198,6 @@
 
         <div class="header">📂 Stealth Files</div>
 
-        <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
-
         <!-- UPLOAD -->
         <div class="uploadBox" id="uploadBox" style="display:none;">
 
@@ -250,7 +221,6 @@
 
         <!-- CARTELLE -->
         <div class="container" id="folders"></div>
-
         <div id="files"></div>
 
     </div>
@@ -309,7 +279,6 @@
             history.pushState({ folder: true }, "");
             document.getElementById("folders").style.display = "none";
             document.getElementById("files").style.display = "block";
-            document.getElementById("backBtn").style.display = "block";
             document.getElementById("uploadBox").style.display = "block";
             // 🔥 RESET QUI
             resetUploadUI();
@@ -320,7 +289,6 @@
         function goBack() {
             document.getElementById("folders").style.display = "grid";
             document.getElementById("files").style.display = "none";
-            document.getElementById("backBtn").style.display = "none";
             document.getElementById("uploadBox").style.display = "none";
         }
 
@@ -470,7 +438,7 @@
             task.on("state_changed",
                 snap => {
                     let p = (snap.bytesTransferred / snap.totalBytes) * 100;
-                    document.getElementById("progressBar").style.width = p + "%";
+                    document.getElementById("progressBar").value = p + "%";
                 },
                 err => alert("Errore upload"),
                 () => {
