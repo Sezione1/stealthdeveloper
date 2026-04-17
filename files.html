@@ -251,6 +251,8 @@
         <!-- CARTELLE -->
         <div class="container" id="folders"></div>
 
+        <div id="files"></div>
+
     </div>
     <!-- FILE -->
     <div class="fileList" id="files" style="display:none;"></div>
@@ -468,7 +470,7 @@
             task.on("state_changed",
                 snap => {
                     let p = (snap.bytesTransferred / snap.totalBytes) * 100;
-                    document.getElementById("progressBar").value = p + "%";
+                    document.getElementById("progressBar").style.width = p + "%";
                 },
                 err => alert("Errore upload"),
                 () => {
