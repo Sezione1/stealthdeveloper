@@ -14,9 +14,23 @@
     <style>
         body {
             margin: 0;
+            height: 100vh;
+            overflow: hidden;
             font-family: Arial;
             background: #0f2027;
             color: white;
+        }
+
+        .mainPage {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #files {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
         }
 
         /* HEADER */
@@ -56,10 +70,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             background: #161b22;
             padding: 12px;
             margin-bottom: 10px;
-            border-radius: 12px;
+            border-radius: 14px;
             transition: 0.2s;
         }
 
@@ -68,18 +83,62 @@
             transform: translateY(-1px);
         }
 
-        .fileName {
+        .leftSide {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             flex: 1;
-            overflow: hidden;
+            min-width: 0;
+        }
+
+        .fileIcon {
+            font-size: 26px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .fileInfo {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .fileName {
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
             cursor: pointer;
-            font-size: 15px;
+        }
+
+        .fileMeta {
+            font-size: 11px;
+            opacity: 0.65;
+            margin-top: 4px;
         }
 
         .actions {
             display: flex;
             gap: 8px;
+        }
+
+        .iconBtn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 10px;
+            background: #30363d;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .iconBtn:hover {
+            background: #58a6ff;
+        }
+
+        .danger:hover {
+            background: #da3633;
         }
 
         .actions button {
@@ -162,34 +221,39 @@
 
 <body>
 
-    <div class="header">📂 Stealth Files</div>
+    <div class="mainPage">
 
-    <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
+        <div class="header">📂 Stealth Files</div>
 
-    <!-- UPLOAD -->
-    <div class="uploadBox" id="uploadBox" style="display:none;">
+        <button class="btn back" onclick="goBack()" id="backBtn" style="display:none;">⬅ Back</button>
 
-        <input type="file" id="fileInput" hidden>
+        <!-- UPLOAD -->
+        <div class="uploadBox" id="uploadBox" style="display:none;">
 
-        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-            📁 Choose file
-        </button>
+            <input type="file" id="fileInput" hidden>
 
-        <div id="fileInfo"></div>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                📁 Choose file
+            </button>
 
-        <div id="progressContainer" style="display:none;">
-            <progress id="progressBar" value="0" max="100"></progress>
+            <div id="fileInfo"></div>
+
+            <div id="progressContainer" style="display:none;">
+                <progress id="progressBar" value="0" max="100"></progress>
+            </div>
+
+            <button class="upload-btn" onclick="uploadFile()">
+                ⬆ Upload
+            </button>
+
         </div>
 
-        <button class="upload-btn" onclick="uploadFile()">
-            ⬆ Upload
-        </button>
+        <!-- CARTELLE -->
+        <div class="container" id="folders"></div>
+
+        <div id="files"></div>
 
     </div>
-
-    <!-- CARTELLE -->
-    <div class="container" id="folders"></div>
-
     <!-- FILE -->
     <div class="fileList" id="files" style="display:none;"></div>
 
@@ -262,34 +326,94 @@
 
         // 📄 CARICA FILE
         function loadFiles() {
+
             const list = document.getElementById("files");
-            list.innerHTML = "";
+            list.innerHTML = "Loading...";
 
             storage.ref("StealthFiles/" + currentFolder).listAll().then(res => {
+
                 res.items.forEach(item => {
+
                     item.getDownloadURL().then(url => {
 
-                        let name = item.name;
-                        if (name.length > 20) {
-                            name = name.substring(0, 10) + "..." + name.slice(-7);
-                        }
+                        item.getMetadata().then(meta => {
 
-                        const row = document.createElement("div");
-                        row.className = "fileRow";
+                            let fullName = item.name;
+                            let shortName = fullName;
 
-                        row.innerHTML = `
-                        <div class="fileName" onclick="openFile('${url}','${item.name}')">${name}</div>
+                            if (shortName.length > 28) {
+                                shortName =
+                                    shortName.substring(0, 18) +
+                                    "..." +
+                                    shortName.slice(-7);
+                            }
 
-                        <div class="actions">
-                        <button onclick="downloadFile('${url}','${item.name}')">📥</button>
-                        <button onclick="copyLink('${url}')">🔗</button>
-                        <button onclick="deleteFile('${item.fullPath}')">🗑</button>
+                            const d = new Date(meta.timeCreated);
+
+                            const data = d.toLocaleDateString();
+                            const ora = d.toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+
+                            const size =
+                                (meta.size / 1024 / 1024).toFixed(1) + " MB";
+
+                            let icon = "📄";
+
+                            if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
+                            else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
+                            else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
+                            else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
+                            else if (fullName.match(/\.(apk)$/i)) icon = "📱";
+                            else if (fullName.match(/\.(exe)$/i)) icon = "💻";
+                            else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
+
+                            const row = document.createElement("div");
+                            row.className = "fileRow";
+
+                            row.innerHTML = `
+                    <div class="leftSide">
+
+                        <div class="fileIcon">${icon}</div>
+
+                        <div class="fileInfo">
+                            <div class="fileName"
+                            onclick="openFile('${url}','${fullName}')">
+                            ${shortName}
+                            </div>
+
+                            <div class="fileMeta">
+                                ${data} • ${ora} • ${size}
+                            </div>
                         </div>
-                        `;
-                        list.appendChild(row);
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button class="iconBtn"
+                        onclick="downloadFile('${url}','${fullName}')">📥</button>
+
+                        <button class="iconBtn"
+                        onclick="copyLink('${url}')">🔗</button>
+
+                        <button class="iconBtn danger"
+                        onclick="deleteFile('${item.fullPath}')">🗑</button>
+
+                    </div>
+                    `;
+
+                            list.appendChild(row);
+
+                        });
+
                     });
+
                 });
+
             });
+            list.innerHTML = "";
         }
 
         // ⬇ DOWNLOAD
