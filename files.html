@@ -212,8 +212,8 @@
                 <progress id="progressBar" value="0" max="100"></progress>
             </div>
 
-            <button class="upload-btn" onclick="uploadFile()">
-                ⬆ Upload
+            <button class="upload-btn" onclick="uploadFile()" id="uploadBtn">
+                📥 Upload
             </button>
 
         </div>
@@ -434,7 +434,12 @@
         function uploadFile() {
             const file = document.getElementById("fileInput").files[0];
             if (!file) return;
+            const btn = document.getElementById("uploadBtn");
 
+            btn.disabled = true;
+            btn.innerText = "⏳ Uploading...";
+            btn.style.opacity = "0.6";
+            btn.style.cursor = "not-allowed";
             const ref = storage.ref("StealthFiles/" + currentFolder + "/" + file.name);
             const task = ref.put(file);
             document.getElementById("progressContainer").style.display = "block";
@@ -443,9 +448,23 @@
                     let p = (snap.bytesTransferred / snap.totalBytes) * 100;
                     document.getElementById("progressBar").style.width = p + "%";
                 },
-                err => alert("Upload error"),
+                err => {
+
+                    btn.disabled = false;
+                    btn.innerText = "📥 Upload";
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+
+                    alert("Upload error");
+                },
                 () => {
-                    alert("Upload complete");
+                    btn.disabled = false;
+                    btn.innerText = "📥 Upload";
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+
+                    alert("Upload completed");
+
                     loadFiles();
                     // ✅ RESET DOPO 1 SECONDO
                     setTimeout(() => {
