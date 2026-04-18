@@ -30,7 +30,7 @@
         #files {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 20px;
+            padding-bottom: 80px;
         }
 
         /* HEADER */
@@ -161,7 +161,7 @@
         }
 
         /* BOTTONI */
-    
+
         .upload-btn {
             background: linear-gradient(45deg, #00ff99, #00ccff);
             border: none;
@@ -196,8 +196,7 @@
 
     <div class="mainPage">
 
-        <div class="header">📂 Stealth Files</div>
-
+        <div class="header" id="headerTitle">📂 Stealth Files</div>
         <!-- UPLOAD -->
         <div class="uploadBox" id="uploadBox" style="display:none;">
 
@@ -277,6 +276,8 @@
         function openFolder(name) {
             currentFolder = name;
             history.pushState({ folder: true }, "");
+            document.getElementById("headerTitle").innerText =
+                "📂 Stealth Files / " + name;
             document.getElementById("folders").style.display = "none";
             document.getElementById("files").style.display = "block";
             document.getElementById("uploadBox").style.display = "block";
@@ -287,6 +288,8 @@
 
         // 🔙 TORNA
         function goBack() {
+            document.getElementById("headerTitle").innerText =
+                "📂 Stealth Files";
             document.getElementById("folders").style.display = "grid";
             document.getElementById("files").style.display = "none";
             document.getElementById("uploadBox").style.display = "none";
