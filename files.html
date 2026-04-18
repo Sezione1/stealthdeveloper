@@ -296,86 +296,88 @@
         }
 
         // 📄 CARICA FILE
-       async function loadFiles() {
+        async function loadFiles() {
 
-    const list = document.getElementById("files");
-    list.innerHTML = "";
+            const list = document.getElementById("files");
+            list.innerHTML = "";
 
-    const res = await storage
-        .ref("StealthFiles/" + currentFolder)
-        .listAll();
+            const res = await storage
+                .ref("StealthFiles/" + currentFolder)
+                .listAll();
 
-    let files = [];
+            // 🔥 tutto in parallelo
+            const files = await Promise.all(
 
-    for (const item of res.items) {
+                res.items.map(async item => {
 
-        const url = await item.getDownloadURL();
-        const meta = await item.getMetadata();
+                    const [url, meta] = await Promise.all([
+                        item.getDownloadURL(),
+                        item.getMetadata()
+                    ]);
 
-        files.push({
-            item,
-            url,
-            meta
-        });
-    }
+                    return { item, url, meta };
 
-    // 🔥 ORDINA PIÙ RECENTI PRIMA
-    files.sort((a, b) =>
-        new Date(b.meta.timeCreated) -
-        new Date(a.meta.timeCreated)
-    );
+                })
+            );
 
-    for (const file of files) {
+            // 🔥 più recenti sopra
+            files.sort((a, b) =>
+                new Date(b.meta.timeCreated) -
+                new Date(a.meta.timeCreated)
+            );
 
-        const item = file.item;
-        const url = file.url;
-        const meta = file.meta;
+            for (const file of files) {
 
-        let fullName = item.name;
-        let shortName = fullName;
+                const item = file.item;
+                const url = file.url;
+                const meta = file.meta;
 
-        if (shortName.length > 28) {
-            shortName =
-                shortName.substring(0, 18) +
-                "..." +
-                shortName.slice(-7);
-        }
+                let fullName = item.name;
+                let shortName = fullName;
 
-        const d = new Date(meta.timeCreated);
+                if (shortName.length > 28) {
+                    shortName =
+                        shortName.substring(0, 18) +
+                        "..." +
+                        shortName.slice(-7);
+                }
 
-        const data = d.toLocaleDateString();
-        const ora = d.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+                const d = new Date(meta.timeCreated);
 
-        let size;
+                const data = d.toLocaleDateString();
+                const ora = d.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
 
-        if (meta.size > 1024 * 1024) {
-            size = (meta.size / 1024 / 1024).toFixed(1) + " MB";
-        } else {
-            size = Math.round(meta.size / 1024) + " KB";
-        }
+                let size;
 
-        let icon = "📄";
+                if (meta.size > 1024 * 1024) {
+                    size = (meta.size / 1024 / 1024).toFixed(1) + " MB";
+                } else {
+                    size = Math.round(meta.size / 1024) + " KB";
+                }
 
-        if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
-        else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
-        else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
-        else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
-        else if (fullName.match(/\.(apk)$/i)) icon = "📱";
-        else if (fullName.match(/\.(exe)$/i)) icon = "💻";
-        else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
+                let icon = "📄";
 
-        const row = document.createElement("div");
-        row.className = "fileRow";
+                if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
+                else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
+                else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
+                else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
+                else if (fullName.match(/\.(apk)$/i)) icon = "📱";
+                else if (fullName.match(/\.(exe)$/i)) icon = "💻";
+                else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
 
-        row.innerHTML = `
+                const row = document.createElement("div");
+                row.className = "fileRow";
+
+                row.innerHTML = `
         <div class="leftSide">
 
             <div class="fileIcon">${icon}</div>
 
             <div class="fileInfo">
+
                 <div class="fileName"
                 onclick="openFile('${url}','${fullName}')">
                 ${shortName}
@@ -384,6 +386,7 @@
                 <div class="fileMeta">
                     ${data} • ${ora} • ${size}
                 </div>
+
             </div>
 
         </div>
@@ -402,9 +405,9 @@
         </div>
         `;
 
-        list.appendChild(row);
-    }
-}
+                list.appendChild(row);
+            }
+        }
 
         // ⬇ DOWNLOAD
         async function downloadFile(url, filename) {
