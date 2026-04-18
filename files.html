@@ -202,7 +202,7 @@
 
             <input type="file" id="fileInput" hidden>
 
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            <button class="upload-btn" id="chooseBtn" onclick="document.getElementById('fileInput').click()">
                 📁 Choose file
             </button>
 
@@ -296,96 +296,115 @@
         }
 
         // 📄 CARICA FILE
-        function loadFiles() {
+       async function loadFiles() {
 
-            const list = document.getElementById("files");
-            list.innerHTML = "Loading...";
+    const list = document.getElementById("files");
+    list.innerHTML = "";
 
-            storage.ref("StealthFiles/" + currentFolder).listAll().then(res => {
+    const res = await storage
+        .ref("StealthFiles/" + currentFolder)
+        .listAll();
 
-                res.items.forEach(item => {
+    let files = [];
 
-                    item.getDownloadURL().then(url => {
+    for (const item of res.items) {
 
-                        item.getMetadata().then(meta => {
+        const url = await item.getDownloadURL();
+        const meta = await item.getMetadata();
 
-                            let fullName = item.name;
-                            let shortName = fullName;
+        files.push({
+            item,
+            url,
+            meta
+        });
+    }
 
-                            if (shortName.length > 28) {
-                                shortName =
-                                    shortName.substring(0, 18) +
-                                    "..." +
-                                    shortName.slice(-7);
-                            }
+    // 🔥 ORDINA PIÙ RECENTI PRIMA
+    files.sort((a, b) =>
+        new Date(b.meta.timeCreated) -
+        new Date(a.meta.timeCreated)
+    );
 
-                            const d = new Date(meta.timeCreated);
+    for (const file of files) {
 
-                            const data = d.toLocaleDateString();
-                            const ora = d.toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
+        const item = file.item;
+        const url = file.url;
+        const meta = file.meta;
 
-                            const size =
-                                (meta.size / 1024 / 1024).toFixed(1) + " MB";
+        let fullName = item.name;
+        let shortName = fullName;
 
-                            let icon = "📄";
-
-                            if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
-                            else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
-                            else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
-                            else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
-                            else if (fullName.match(/\.(apk)$/i)) icon = "📱";
-                            else if (fullName.match(/\.(exe)$/i)) icon = "💻";
-                            else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
-
-                            const row = document.createElement("div");
-                            row.className = "fileRow";
-
-                            row.innerHTML = `
-                    <div class="leftSide">
-
-                        <div class="fileIcon">${icon}</div>
-
-                        <div class="fileInfo">
-                            <div class="fileName"
-                            onclick="openFile('${url}','${fullName}')">
-                            ${shortName}
-                            </div>
-
-                            <div class="fileMeta">
-                                ${data} • ${ora} • ${size}
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="actions">
-
-                        <button class="iconBtn"
-                        onclick="downloadFile('${url}','${fullName}')">📥</button>
-
-                        <button class="iconBtn"
-                        onclick="copyLink('${url}')">🔗</button>
-
-                        <button class="iconBtn danger"
-                        onclick="deleteFile('${item.fullPath}')">🗑</button>
-
-                    </div>
-                    `;
-
-                            list.appendChild(row);
-
-                        });
-
-                    });
-
-                });
-
-            });
-            list.innerHTML = "";
+        if (shortName.length > 28) {
+            shortName =
+                shortName.substring(0, 18) +
+                "..." +
+                shortName.slice(-7);
         }
+
+        const d = new Date(meta.timeCreated);
+
+        const data = d.toLocaleDateString();
+        const ora = d.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        let size;
+
+        if (meta.size > 1024 * 1024) {
+            size = (meta.size / 1024 / 1024).toFixed(1) + " MB";
+        } else {
+            size = Math.round(meta.size / 1024) + " KB";
+        }
+
+        let icon = "📄";
+
+        if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
+        else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
+        else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
+        else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
+        else if (fullName.match(/\.(apk)$/i)) icon = "📱";
+        else if (fullName.match(/\.(exe)$/i)) icon = "💻";
+        else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
+
+        const row = document.createElement("div");
+        row.className = "fileRow";
+
+        row.innerHTML = `
+        <div class="leftSide">
+
+            <div class="fileIcon">${icon}</div>
+
+            <div class="fileInfo">
+                <div class="fileName"
+                onclick="openFile('${url}','${fullName}')">
+                ${shortName}
+                </div>
+
+                <div class="fileMeta">
+                    ${data} • ${ora} • ${size}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button class="iconBtn"
+            onclick="downloadFile('${url}','${fullName}')">📥</button>
+
+            <button class="iconBtn"
+            onclick="copyLink('${url}')">🔗</button>
+
+            <button class="iconBtn danger"
+            onclick="deleteFile('${item.fullPath}')">🗑</button>
+
+        </div>
+        `;
+
+        list.appendChild(row);
+    }
+}
 
         // ⬇ DOWNLOAD
         async function downloadFile(url, filename) {
@@ -435,11 +454,18 @@
             const file = document.getElementById("fileInput").files[0];
             if (!file) return;
             const btn = document.getElementById("uploadBtn");
-
+            const chooseBtn = document.getElementById("chooseBtn");
             btn.disabled = true;
+            chooseBtn.disabled = true;
+
             btn.innerText = "⏳ Uploading...";
+            chooseBtn.innerText = "⏳ Locked";
+
             btn.style.opacity = "0.6";
+            chooseBtn.style.opacity = "0.6";
+
             btn.style.cursor = "not-allowed";
+            chooseBtn.style.cursor = "not-allowed";
             const ref = storage.ref("StealthFiles/" + currentFolder + "/" + file.name);
             const task = ref.put(file);
             document.getElementById("progressContainer").style.display = "block";
@@ -455,6 +481,9 @@
                     btn.style.opacity = "1";
                     btn.style.cursor = "pointer";
 
+                    chooseBtn.disabled = false;
+                    chooseBtn.innerText = "📁 Choose file";
+                    chooseBtn.style.opacity = "1";
                     alert("Upload error");
                 },
                 () => {
@@ -462,7 +491,9 @@
                     btn.innerText = "📥 Upload";
                     btn.style.opacity = "1";
                     btn.style.cursor = "pointer";
-
+                    chooseBtn.disabled = false;
+                    chooseBtn.innerText = "📁 Choose file";
+                    chooseBtn.style.opacity = "1";
                     alert("Upload completed");
 
                     loadFiles();
