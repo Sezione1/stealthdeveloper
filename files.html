@@ -515,7 +515,6 @@
                     a.click();
 
                     URL.revokeObjectURL(blobUrl);
-                    showToast("✔ Upload completed");
                 } catch (e) {
                     showToast("Download error");
                     console.log(e);
@@ -579,7 +578,7 @@
                     chooseBtn.disabled = false;
                     chooseBtn.innerText = "📁 Choose file";
                     chooseBtn.style.opacity = "1";
-                    alert("Upload error");
+                    showToast("Upload error");
                 },
                 () => {
                     btn.disabled = false;
@@ -589,7 +588,7 @@
                     chooseBtn.disabled = false;
                     chooseBtn.innerText = "📁 Choose file";
                     chooseBtn.style.opacity = "1";
-                    alert("Upload completed");
+                    showToast("✔ Upload completed");
 
                     loadFiles();
                     // ✅ RESET DOPO 1 SECONDO
