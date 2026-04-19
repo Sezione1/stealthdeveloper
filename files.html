@@ -204,8 +204,83 @@
             height: 8px;
             margin-top: 10px;
         }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modalBox {
+            width: 85%;
+            max-width: 320px;
+            background: #161b22;
+            padding: 20px;
+            border-radius: 18px;
+            text-align: center;
+            animation: pop .18s ease;
+        }
+
+        .modalBtns {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .modalBtns button {
+            flex: 1;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modalBtns button:last-child {
+            background: #00ff99;
+        }
+
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: 25px;
+            transform: translateX(-50%);
+            background: #161b22;
+            padding: 12px 18px;
+            border-radius: 12px;
+            display: none;
+            z-index: 1000;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(.85);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
+<div id="modal" class="modal">
+    <div class="modalBox">
+        <div id="modalText">Message</div>
+
+        <div class="modalBtns">
+            <button onclick="closeModal()">Cancel</button>
+            <button id="confirmBtn">OK</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
 
 <body>
 
@@ -426,32 +501,34 @@
 
         // ⬇ DOWNLOAD
         async function downloadFile(url, filename) {
-            if (!confirm("Download files?")) return;
-            try {
-                const response = await fetch(url);
-                const blob = await response.blob();
+            showConfirm("Download file?", async () => {
 
-                const blobUrl = URL.createObjectURL(blob);
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
 
-                const a = document.createElement("a");
-                a.href = blobUrl;
-                a.download = filename;
-                a.click();
+                    const blobUrl = URL.createObjectURL(blob);
 
-                URL.revokeObjectURL(blobUrl);
+                    const a = document.createElement("a");
+                    a.href = blobUrl;
+                    a.download = filename;
+                    a.click();
 
-            } catch (e) {
-                alert("Errore download");
-                console.log(e);
-            }
+                    URL.revokeObjectURL(blobUrl);
+                    showToast("✔ Upload completed");
+                } catch (e) {
+                    showToast("Download error");
+                    console.log(e);
+                }
+            });
         }
         // 🗑 DELETE
         function deleteFile(path) {
-            if (confirm("Delete files?")) {
+            showConfirm("Delete file?", () => {
                 storage.ref(path).delete().then(() => {
                     loadFiles();
                 });
-            }
+            });
         }
 
         // 👁 OPEN FILE
@@ -538,7 +615,7 @@
         });
         function copyLink(url) {
             navigator.clipboard.writeText(url).then(() => {
-                alert("Link copied");
+                showToast("✔ Link copied");
             });
         }
         window.onpopstate = function () {
@@ -548,6 +625,32 @@
             }
 
         };
+        function showConfirm(text, callback) {
+
+            document.getElementById("modal").style.display = "flex";
+            document.getElementById("modalText").innerText = text;
+
+            document.getElementById("confirmBtn").onclick = () => {
+                closeModal();
+                callback();
+            };
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        function showToast(text) {
+
+            const t = document.getElementById("toast");
+
+            t.innerText = text;
+            t.style.display = "block";
+
+            setTimeout(() => {
+                t.style.display = "none";
+            }, 1800);
+        }
     </script>
 
 </body>
