@@ -1,141 +1,160 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en" translate="no">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Stealth Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title translate="no">Stealth Login</title>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #000000, #0f2027);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #000000, #0f2027);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      position: relative;
+    }
 
-.container {
-  background: rgba(0,0,0,0.7);
-  padding: 30px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 350px;
-  box-shadow: 0 0 20px rgba(0,255,0,0.2);
-  text-align: center;
-}
-.container {
-  position: relative;
-  z-index: 1;
-}
-h2 {
-  margin-bottom: 20px;
-}
+    .container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 350px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+      text-align: center;
+    }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 8px;
-  outline: none;
-  font-size: 16px;
-  box-sizing: border-box; /* 🔥 FIX */
-  display: block;
-}
+    .container {
+      position: relative;
+      z-index: 1;
+    }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: #00ff99;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: bold;
-}
+    .container {
+      box-sizing: border-box;
+      max-height: 95dvh;
+    }
 
-button:hover {
-  background: #00cc77;
-}
+    h2 {
+      margin-bottom: 20px;
+    }
 
-.toggle {
-  font-size: 14px;
-  cursor: pointer;
-  color: #00ffcc;
-}
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      box-sizing: border-box;
+      /* 🔥 FIX */
+      display: block;
+    }
 
-#msg {
-  margin-top: 10px;
-  color: red;
-}
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #00ff99;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-/* effetto hacker leggero */
-body::before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: url("https://www.transparenttextures.com/patterns/asfalt-light.png");
-  opacity: 0.05;
-  pointer-events: none; /* 🔥 QUESTA È LA FIX */
-}
-</style>
+    button:hover {
+      background: #00cc77;
+    }
+
+    .toggle {
+      font-size: 14px;
+      cursor: pointer;
+      color: #00ffcc;
+    }
+
+    #msg {
+      margin-top: 10px;
+      color: red;
+    }
+
+    /* effetto hacker leggero */
+    body::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url("https://www.transparenttextures.com/patterns/asfalt-light.png");
+      opacity: 0.05;
+      pointer-events: none;
+      /* 🔥 QUESTA È LA FIX */
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h2>🔐 Secure Access</h2>
+  <div class="container">
+    <h2>🔐 Secure Access</h2>
 
-  <input type="email" id="email" placeholder="Email">
+    <input type="email" id="email" placeholder="Email">
 
-  <input type="password" id="password" placeholder="Password">
-  <div class="toggle" onclick="togglePassword()">👁 Mostra/Nascondi password</div>
+    <input type="password" id="password" placeholder="Password">
+    <div class="toggle" onclick="togglePassword()">👁 Mostra/Nascondi password</div>
 
-  <button onclick="login()">Login</button>
+    <button onclick="login()">Login</button>
 
-  <p id="msg"></p>
-</div>
+    <p id="msg"></p>
+  </div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAClXwYAbKBec_Mc6XQT9ttNCQJTwlV2UU",
-  authDomain: "stealthdeveloperfiles.firebaseapp.com",
-  projectId: "stealthdeveloperfiles",
-  storageBucket: "stealthdeveloperfiles.firebasestorage.app",
-  messagingSenderId: "918965438979",
-  appId: "1:918965438979:web:6634ab5caf697c116d9c36"
-};
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAClXwYAbKBec_Mc6XQT9ttNCQJTwlV2UU",
+      authDomain: "stealthdeveloperfiles.firebaseapp.com",
+      projectId: "stealthdeveloperfiles",
+      storageBucket: "stealthdeveloperfiles.firebasestorage.app",
+      messagingSenderId: "918965438979",
+      appId: "1:918965438979:web:6634ab5caf697c116d9c36"
+    };
 
-firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 
-function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+    function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-  firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(() => {
-      window.location.href = "files.html";
-    })
-    .catch(() => {
-      document.getElementById("msg").innerText = "Accesso negato";
-    });
-}
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = "files.html";
+        })
+        .catch(() => {
+          document.getElementById("msg").innerText = "Accesso negato";
+        });
+    }
 
-function togglePassword() {
-  const pass = document.getElementById("password");
-  pass.type = pass.type === "password" ? "text" : "password";
-}
-</script>
+    function togglePassword() {
+      const pass = document.getElementById("password");
+      pass.type = pass.type === "password" ? "text" : "password";
+    }
+  </script>
 
 </body>
+
 </html>
