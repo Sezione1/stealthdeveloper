@@ -176,7 +176,6 @@
         }
 
         /* BOTTONI */
-
         .upload-btn {
             background: linear-gradient(45deg, #00ff99, #00ccff);
             border: none;
@@ -187,11 +186,27 @@
             width: 100%;
             margin-top: 10px;
             cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            transition: 0.2s;
         }
 
         .upload-btn:hover {
-            opacity: 0.8;
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
+
+        .upload-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        
 
         #fileInfo {
             margin-top: 10px;
@@ -293,7 +308,31 @@
             <input type="file" id="fileInput" hidden>
 
             <button class="upload-btn" id="chooseBtn" onclick="document.getElementById('fileInput').click()">
-                📁 Choose file
+
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M3 7h5l2 2h11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                </svg>
+
+                <span>Choose file</span>
+
+            </button>
+
+
+            <button class="upload-btn" id="uploadBtn" onclick="uploadFile()">
+
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M12 21V9" />
+                    <path d="M7 14l5-5 5 5" />
+                    <path d="M5 3h14" />
+
+                </svg>
+
+                <span>Upload</span>
+
             </button>
 
             <div id="fileInfo"></div>
@@ -303,7 +342,15 @@
             </div>
 
             <button class="upload-btn" onclick="uploadFile()" id="uploadBtn">
-                📥 Upload
+
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 21V9"></path>
+                    <path d="M7 14l5-5 5 5"></path>
+                    <path d="M5 3h14"></path>
+                </svg>
+
+                <span>Upload</span>
+
             </button>
 
         </div>
