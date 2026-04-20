@@ -206,7 +206,7 @@
             transform: none;
         }
 
-        
+
 
         #fileInfo {
             margin-top: 10px;
@@ -320,6 +320,12 @@
             </button>
 
 
+            <div id="fileInfo"></div>
+
+            <div id="progressContainer" style="display:none;">
+                <progress id="progressBar" value="0" max="100"></progress>
+            </div>
+
             <button class="upload-btn" id="uploadBtn" onclick="uploadFile()">
 
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
@@ -329,24 +335,6 @@
                     <path d="M7 14l5-5 5 5" />
                     <path d="M5 3h14" />
 
-                </svg>
-
-                <span>Upload</span>
-
-            </button>
-
-            <div id="fileInfo"></div>
-
-            <div id="progressContainer" style="display:none;">
-                <progress id="progressBar" value="0" max="100"></progress>
-            </div>
-
-            <button class="upload-btn" onclick="uploadFile()" id="uploadBtn">
-
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 21V9"></path>
-                    <path d="M7 14l5-5 5 5"></path>
-                    <path d="M5 3h14"></path>
                 </svg>
 
                 <span>Upload</span>
@@ -643,23 +631,17 @@
                 err => {
 
                     btn.disabled = false;
-                    btn.innerText = "📥 Upload";
-                    btn.style.opacity = "1";
-                    btn.style.cursor = "pointer";
+
 
                     chooseBtn.disabled = false;
-                    chooseBtn.innerText = "📁 Choose file";
-                    chooseBtn.style.opacity = "1";
+                    resetUploadButtons();
                     showToast("Upload error");
                 },
                 () => {
                     btn.disabled = false;
-                    btn.innerText = "📥 Upload";
-                    btn.style.opacity = "1";
-                    btn.style.cursor = "pointer";
+
                     chooseBtn.disabled = false;
-                    chooseBtn.innerText = "📁 Choose file";
-                    chooseBtn.style.opacity = "1";
+                    resetUploadButtons();
                     showToast("✔ Upload completed");
 
                     loadFiles();
@@ -669,6 +651,37 @@
                     }, 1000);
                 }
             );
+        }
+        function resetUploadButtons() {
+
+            chooseBtn.innerHTML = `
+<svg viewBox="0 0 24 24"
+width="18" height="18"
+fill="none"
+stroke="currentColor"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round">
+<path d="M3 7h5l2 2h11v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+</svg>
+<span>Choose file</span>
+`;
+
+            uploadBtn.innerHTML = `
+<svg viewBox="0 0 24 24"
+width="18" height="18"
+fill="none"
+stroke="currentColor"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round">
+<path d="M12 21V9"/>
+<path d="M7 14l5-5 5 5"/>
+<path d="M5 3h14"/>
+</svg>
+<span>Upload</span>
+`;
+
         }
         function resetUploadUI() {
             document.getElementById("fileInput").value = "";
