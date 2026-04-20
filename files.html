@@ -768,7 +768,7 @@
             try {
 
                 await storage
-                    .ref("StealthFiles/" + name)
+                    .ref("StealthFiles/" + name + "/")
                     .putString("folder");
 
                 closeFolderModal();
