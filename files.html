@@ -345,6 +345,11 @@
 
         <!-- CARTELLE -->
         <div class="container" id="folders"></div>
+        <button class="upload-btn" id="newFolderBtn" onclick="askNewFolder()">
+
+            ➕ New Folder
+
+        </button>
         <div id="files"></div>
 
     </div>
@@ -395,6 +400,7 @@
                     container.appendChild(div);
                 });
             });
+
         }
 
         // 📂 APRI CARTELLA
@@ -406,6 +412,7 @@
             document.getElementById("folders").style.display = "none";
             document.getElementById("files").style.display = "block";
             document.getElementById("uploadBox").style.display = "block";
+            document.getElementById("newFolderBtn").style.display = "none";
             // 🔥 RESET QUI
             resetUploadUI();
             loadFiles();
@@ -418,6 +425,7 @@
             document.getElementById("folders").style.display = "grid";
             document.getElementById("files").style.display = "none";
             document.getElementById("uploadBox").style.display = "none";
+            document.getElementById("newFolderBtn").style.display = "block";
         }
 
         // 📄 CARICA FILE
@@ -737,8 +745,77 @@
                 t.style.display = "none";
             }, 1800);
         }
-    </script>
+        function askNewFolder() {
 
+            document.getElementById("folderModal").style.display = "flex";
+            document.getElementById("folderName").value = "";
+            document.getElementById("folderName").focus();
+        }
+
+        function closeFolderModal() {
+            document.getElementById("folderModal").style.display = "none";
+        }
+
+        async function createFolder() {
+
+            let name =
+                document.getElementById("folderName").value.trim();
+
+            if (!name) return;
+
+            name = name.replace(/[.#$\[\]/]/g, "");
+
+            try {
+
+                await storage
+                    .ref("StealthFiles/" + name + "/.keep")
+                    .putString("folder");
+
+                closeFolderModal();
+
+                loadFolders();
+
+                showToast("✔ Folder created");
+
+            } catch (e) {
+
+                showToast("Error");
+                console.log(e);
+            }
+        }
+    </script>
+    <div id="folderModal" class="modal">
+
+        <div class="modalBox">
+
+            <div style="font-size:18px;font-weight:bold;">
+                Create Folder
+            </div>
+
+            <input id="folderName" placeholder="Folder name" style="
+            width:100%;
+            padding:12px;
+            margin-top:15px;
+            border:none;
+            border-radius:12px;
+            box-sizing:border-box;
+            font-size:16px;">
+
+            <div class="modalBtns">
+
+                <button onclick="closeFolderModal()">
+                    Cancel
+                </button>
+
+                <button onclick="createFolder()">
+                    Create
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
 </body>
 
 </html>
