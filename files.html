@@ -271,6 +271,13 @@
             z-index: 1000;
         }
 
+        .smallBtn {
+            width: auto;
+            padding: 12px 20px;
+            margin: 10px auto;
+            display: flex;
+        }
+
         @keyframes pop {
             from {
                 transform: scale(.85);
@@ -345,7 +352,7 @@
 
         <!-- CARTELLE -->
         <div class="container" id="folders"></div>
-        <button class="upload-btn" id="newFolderBtn" onclick="askNewFolder()">
+        <button class="upload-btn smallBtn" id="newFolderBtn" onclick="askNewFolder()">
 
             ➕ New Folder
 
@@ -768,7 +775,7 @@
             try {
 
                 await storage
-                    .ref("StealthFiles/" + name + "/")
+                    .ref("StealthFiles/" + name + "/.keep")
                     .putString("folder");
 
                 closeFolderModal();
