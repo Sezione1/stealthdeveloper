@@ -443,7 +443,10 @@
                     );
 
                     showToast("✔ Folder deleted");
-                    loadFolders();
+
+                    setTimeout(() => {
+                        loadFolders();
+                    }, 800);
 
                 } catch (e) {
                     console.log(e);
@@ -482,85 +485,85 @@
         // 📄 CARICA FILE
         async function loadFiles() {
 
-    const list = document.getElementById("files");
-    list.innerHTML = "";
+            const list = document.getElementById("files");
+            list.innerHTML = "";
 
-    const res = await storage
-        .ref("StealthFiles/" + currentFolder)
-        .listAll();
+            const res = await storage
+                .ref("StealthFiles/" + currentFolder)
+                .listAll();
 
-    // Carica tutto in parallelo e nasconde .keep
-    const files = await Promise.all(
+            // Carica tutto in parallelo e nasconde .keep
+            const files = await Promise.all(
 
-        res.items.map(async item => {
+                res.items.map(async item => {
 
-            if (item.name === ".keep") return null;
+                    if (item.name === ".keep") return null;
 
-            const [url, meta] = await Promise.all([
-                item.getDownloadURL(),
-                item.getMetadata()
-            ]);
+                    const [url, meta] = await Promise.all([
+                        item.getDownloadURL(),
+                        item.getMetadata()
+                    ]);
 
-            return { item, url, meta };
+                    return { item, url, meta };
 
-        })
-    );
+                })
+            );
 
-    // Rimuove i null (.keep)
-    const validFiles = files.filter(file => file !== null);
+            // Rimuove i null (.keep)
+            const validFiles = files.filter(file => file !== null);
 
-    // Più recenti sopra
-    validFiles.sort((a, b) =>
-        new Date(b.meta.timeCreated) -
-        new Date(a.meta.timeCreated)
-    );
+            // Più recenti sopra
+            validFiles.sort((a, b) =>
+                new Date(b.meta.timeCreated) -
+                new Date(a.meta.timeCreated)
+            );
 
-    for (const file of validFiles) {
+            for (const file of validFiles) {
 
-        const item = file.item;
-        const url = file.url;
-        const meta = file.meta;
+                const item = file.item;
+                const url = file.url;
+                const meta = file.meta;
 
-        let fullName = item.name;
-        let shortName = fullName;
+                let fullName = item.name;
+                let shortName = fullName;
 
-        if (shortName.length > 28) {
-            shortName =
-                shortName.substring(0, 18) +
-                "..." +
-                shortName.slice(-7);
-        }
+                if (shortName.length > 28) {
+                    shortName =
+                        shortName.substring(0, 18) +
+                        "..." +
+                        shortName.slice(-7);
+                }
 
-        const d = new Date(meta.timeCreated);
+                const d = new Date(meta.timeCreated);
 
-        const data = d.toLocaleDateString();
-        const ora = d.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+                const data = d.toLocaleDateString();
+                const ora = d.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
 
-        let size;
+                let size;
 
-        if (meta.size > 1024 * 1024) {
-            size = (meta.size / 1024 / 1024).toFixed(1) + " MB";
-        } else {
-            size = Math.round(meta.size / 1024) + " KB";
-        }
+                if (meta.size > 1024 * 1024) {
+                    size = (meta.size / 1024 / 1024).toFixed(1) + " MB";
+                } else {
+                    size = Math.round(meta.size / 1024) + " KB";
+                }
 
-        let icon = "📄";
+                let icon = "📄";
 
-        if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
-        else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
-        else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
-        else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
-        else if (fullName.match(/\.(apk)$/i)) icon = "📱";
-        else if (fullName.match(/\.(exe)$/i)) icon = "💻";
-        else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
+                if (fullName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = "🖼";
+                else if (fullName.match(/\.(mp4|avi|mkv|mov)$/i)) icon = "🎬";
+                else if (fullName.match(/\.(mp3|wav)$/i)) icon = "🎵";
+                else if (fullName.match(/\.(zip|rar|7z)$/i)) icon = "🗜";
+                else if (fullName.match(/\.(apk)$/i)) icon = "📱";
+                else if (fullName.match(/\.(exe)$/i)) icon = "💻";
+                else if (fullName.match(/\.(pdf)$/i)) icon = "📕";
 
-        const row = document.createElement("div");
-        row.className = "fileRow";
+                const row = document.createElement("div");
+                row.className = "fileRow";
 
-        row.innerHTML = `
+                row.innerHTML = `
         <div class="leftSide">
 
             <div class="fileIcon">${icon}</div>
@@ -619,9 +622,9 @@
         </div>
         `;
 
-        list.appendChild(row);
-    }
-}
+                list.appendChild(row);
+            }
+        }
 
         // ⬇ DOWNLOAD
         async function downloadFile(url, filename) {
