@@ -493,7 +493,7 @@
             const files = await Promise.all(
 
                 res.items.map(async item => {
-
+                    if (item.name === ".keep") return null;
                     const [url, meta] = await Promise.all([
                         item.getDownloadURL(),
                         item.getMetadata()
